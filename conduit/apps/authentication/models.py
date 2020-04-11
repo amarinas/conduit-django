@@ -1,11 +1,11 @@
 import jwt
 
-from datetime import datetime, timedata
+from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.contrib.auth.models import {
+from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
-}
+)
 
 from django.db import models
 
@@ -42,15 +42,15 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(db_index=True, max_length=255, unique=True)
     email = models.EmailField(db_index=True, unique=True)
-    is_active = models.BoleanField(default=True)
-    is_staff = models.BoleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
     create_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
-    objects = UserManger()
+    objects = UserManager()
 
     def __str__(self):
 
@@ -65,7 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
     def get_short_name(self):
-        retugn self.username
+        return self.username
 
     def _generate_jwt_token(self):
         """ genrate a JSON Web Token for 60 days into the future for the User ID"""
@@ -77,4 +77,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token.decode('utf-8')
-        
