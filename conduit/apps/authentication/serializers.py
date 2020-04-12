@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 
 from .models import User
 
@@ -16,7 +17,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     )
 
     #token is created when registration and token is only read only
-    token = serializers.CharField(max+max_length=255, read_only=True)
+    token = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = User
@@ -27,3 +28,44 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         #use create_user method to create new user
         return User.objects.create_user(**validated_data)
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=255)
+    username = serializers.CharField(max_length=255, read_only=True)
+    password = serializers.CharField(max_length=128, write_only=True)
+    token = serializers.CharField(max_length=255, read_only=True)
+
+    def validate(self, data):
+
+        email = data.get('email', None)
+        password = data.get('password', None)
+
+        #exception if not vaild
+        if email is None:
+            raise serializers.ValidationError(
+                'Email is needed to Login'
+            )
+
+        if password is None:
+            raise serializers.ValidationError(
+                'Password is needed to Login'
+            )
+
+        user = authenticate(username=email, password=password)
+
+        if user is None:
+            raise serializers.ValidationError(
+                'user is not found please try again'
+            )
+
+        if not user.is_active:
+            raise serializers.ValidationError(
+                'user has been deactivated'
+            )
+
+        return {
+            'email': user.email,
+            'username': user.username,
+            'token': user.token 
+        }

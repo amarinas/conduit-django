@@ -3,11 +3,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .renderers import UserJSONRenderer
+
 from .serializers import RegistrationSerializer
 
 class RegistrationAPIView(APIView):
     #Allow any user to hit this end point
     permission_classes = (AllowAny,)
+    renderer_classes = (UserJSONRenderer,)
     serializer_class = RegistrationSerializer
 
     def post(self, request):
