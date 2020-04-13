@@ -3,7 +3,7 @@ from django.db import models
 from conduit.apps.core.models import TimestampedModel
 
 class Profile(TimestampedModel):
-    user = models.OnetoOneField(
+    user = models.OneToOneField(
         'authentication.User', on_delete=models.CASCADE
     )
 
