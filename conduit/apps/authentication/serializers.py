@@ -78,7 +78,7 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=128,
         min_length=8,
         write_only=True
-
+        )
     profile = ProfileSerializer(write_only=True)
     bio = serializers.CharField(source='profile.bio', read_only=True)
     image = serializers.CharField(source="profile.image", read_only=True)

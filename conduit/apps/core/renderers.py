@@ -1,10 +1,10 @@
 import json
 
-from rest_framework import JSONRenderer
+from rest_framework.renderers import JSONRenderer
 
 class ConduitJSONRenderer(JSONRenderer):
     charset ='utf-8'
-    object-label = 'object'
+    object_label = 'object'
 
     def render(self, data, media_type=None, render_context=None):
         error = data.get('errors', None)

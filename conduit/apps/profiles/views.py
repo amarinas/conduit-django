@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .exceptions import ProfileDoesNotExist
 from .models import Profile
-from .renderes import ProfileJSONRenderer
+from .renderers import ProfileJSONRenderer
 from .serializers import ProfileSerializer
 
 class ProfileRerieveAPIView(RetrieveAPIView):
