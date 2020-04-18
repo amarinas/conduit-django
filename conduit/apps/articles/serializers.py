@@ -31,4 +31,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         return Article.objects.create(author=author, **validated_data)
 
     def get_created_at(self, instance):
-        return instance.created_at.isformat()
+        return instance.created_at.isoformat()
+
+    def get_updated_at(self, instance):
+        return instance.updated_at.isoformat()
