@@ -1,4 +1,4 @@
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -6,7 +6,7 @@ from .models import Article
 from .renderers import ArticleJSONRenderer
 from .serializers import ArticleSerializer
 
-class ArticleViewSet(mixins.CreateModelMixin, viewsets.GenericViewSets):
+class ArticleViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     queryset = Article.objects.select_related('author', 'author_user')
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -24,4 +24,3 @@ class ArticleViewSet(mixins.CreateModelMixin, viewsets.GenericViewSets):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
