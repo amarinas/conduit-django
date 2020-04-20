@@ -10,7 +10,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     #password min 8 max is 128
     #characters and not readable why typing
-    password =serializers.CharField(
+    password = serializers.CharField(
         max_length=128,
         min_length=8,
         write_only= True
