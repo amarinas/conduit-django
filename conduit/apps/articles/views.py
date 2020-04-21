@@ -64,7 +64,7 @@ class CommentsListCreateAPIView(generics.ListCreateAPIView):
     lookup_field = 'article__slug'
     lookkup_url_kwarg = 'article_slug'
     permission_classes =(IsAuthenticatedOrReadOnly,)
-    queryset = Comment.objexts.select_related(
+    queryset = Comment.objects.select_related(
         'article', 'article__author', 'article__author__user',
         'author', 'author__user'
     )
