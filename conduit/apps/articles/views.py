@@ -1,11 +1,11 @@
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets, status, generics
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from .models import Article
-from .renderers import ArticleJSONRenderer
-from .serializers import ArticleSerializer
+from .models import Article, Comment
+from .renderers import ArticleJSONRenderer, CommentJSONRenderer
+from .serializers import ArticleSerializer, CommentSerializer
 
 class ArticleViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
@@ -57,3 +57,36 @@ class ArticleViewSet(mixins.CreateModelMixin,
         serialer = self.serializer_class(serializer_instance)
 
         return Response(serialer.data, status=status.HTTP_200_OK)
+
+
+
+class CommentsListCreateAPIView(generics.ListCreateAPIView):
+    lookup_field = 'article__slug'
+    lookkup_url_kwarg = 'article_slug'
+    permission_classes =(IsAuthenticatedOrReadOnly,)
+    queryset = Comment.objexts.select_related(
+        'article', 'article__author', 'article__author__user',
+        'author', 'author__user'
+    )
+    renderer_classes = (CommentJSONRenderer,)
+    serializer_class = CommentSerializer
+
+    def filter_queryset(self, queryset):
+        filters = {self.lookup_field: self.kwargs[self.lookkup_url_kwarg]}
+
+        return queryset.filter(**filters)
+
+    def create(self, request, article_slug=None):
+        data = request.data.get('comment', {})
+        context = {'author': request.user.profile}
+
+        try:
+            context['article'] = Article.objexts.get(slug=article_slug)
+        except Article.DoesNotExist:
+            raise NotFound('article with this slug does not exist')
+
+        serializer = self.serializer_class(data=data, context=context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
