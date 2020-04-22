@@ -14,5 +14,5 @@ app_name= 'articles'
 urlpatterns=[
     path('', include(router.urls)),
     path('articles/<slug:article_slug>/comments', CommentsListCreateAPIView.as_view()),
-    path('aricles/<slug:article_slug>/comments/<int:comment_pk>', CommentsDestroyAPIView),
+    path('aricles/<slug:article_slug>/comments/<int:comment_pk>', CommentsDestroyAPIView.as_view()),
 ]
