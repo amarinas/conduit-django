@@ -19,7 +19,11 @@ class ArticleViewSet(mixins.CreateModelMixin,
     serializer_class = ArticleSerializer
 
     def create(self, request):
-        serializer_context ={'author': request.user.profile}
+        serializer_context ={
+            'author': request.user.profile,
+            'request': request
+            }
+
         serializer_data = request.data.get('article', {})
 
         serializer = self.serializer_class(
@@ -30,8 +34,20 @@ class ArticleViewSet(mixins.CreateModelMixin,
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def list(self, request):
+        serializer_context = {'request': request}
+        serializer_instance = self.queryset.all()
+
+        serializer = self.serializer_class(
+            serializer_instance,
+            context=serializer_context,
+            many=True
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, slug):
+        serializer_context = {'request': request}
         try:
             serializer_instance = self.queryset.get(slug=slug)
         except Article.DoesNotExist:
@@ -40,7 +56,10 @@ class ArticleViewSet(mixins.CreateModelMixin,
         serializer_data = request.data.get('article', {})
 
         serializer = self.serializer_class(
-            serializer_instance, data=serializer_data, partial=True
+            serializer_instance,
+            data=serializer_data,
+            partial=True,
+            context=serializer_context,
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -49,12 +68,16 @@ class ArticleViewSet(mixins.CreateModelMixin,
 
 
     def retrieve(self, request, slug):
+        serializer_context = {'request': request}
         try:
             serializer_instance = self.queryset.get(slug=slug)
         except Article.DoesNotExist:
             raise NotFound('An Article with this slug does not exist')
 
-        serialer = self.serializer_class(serializer_instance)
+        serializer = self.serializer_class(
+            serializer_instance,
+            context=serializer_context
+        )
 
         return Response(serialer.data, status=status.HTTP_200_OK)
 
