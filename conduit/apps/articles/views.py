@@ -19,6 +19,25 @@ class ArticleViewSet(mixins.CreateModelMixin,
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+
+        author = self.request.query_params.get('author', None)
+        if author is not None:
+            queryset = queryset.filter(author__user__username=author)
+
+        tag = self.request.query_params.get('tag', None)
+        if tag is not None:
+            queryset = queryset.filter(tags__tag=tag)
+
+        favorited_by = self.request.query_params.get('favorited', None)
+        if favorited_by is not None:
+            queryset = queryset.filter(
+                favorited_by__user__username=favorited_by
+            )
+
+        return queryset
+
     def create(self, request):
         serializer_context ={
             'author': request.user.profile,
@@ -38,7 +57,7 @@ class ArticleViewSet(mixins.CreateModelMixin,
     def list(self, request):
         serializer_context = {'request': request}
         #serializer_instance = self.queryset.all()
-        page = self.paginate_queryset(self.queryset)
+        page = self.paginate_queryset(self.get_queryset())
 
         serializer = self.serializer_class(
             #serializer_instance,
@@ -186,3 +205,27 @@ class TagListAPIView(generics.ListAPIView):
         return Response({
             'tags': serializer.data
         }, status, status=status.HTTP_200_OK)
+
+
+class ArticlesFeedAPIView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset =Article.objects.all()
+    renderer_classes = (ArticleJSONRenderer,)
+    serializer_class = ArticleSerializer
+
+    def get_queryset(self):
+        return Article.objects.filter(
+            author_in=self.request.user.progile.follows.all()
+
+        )
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+
+        serializer_context = {'request': request}
+        serializer = self.serializer_class(
+            page, context=serializer_context, many= True
+        )
+
+        return self.get_paginated_response(serializer.data)
